@@ -10,3 +10,7 @@ def get_input_args():
                         type = str, default = 'DOGE', 
                         help = 'Argument for currency which will be scraped')
     return parser.parse_args()
+
+def get_startpage_url(currency):
+	"""Returns url of currency traded against Bitcoin"""
+	currency_url = "https://coinsquare.com/trade?pair=" + currency + "-BTC"
