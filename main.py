@@ -1,7 +1,7 @@
 from support_functions import get_input_args, get_startpage_url
 from utility_classes import send_text_notification
 from utility_classes import get_prices_and_record_into_database
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 from ast import literal_eval
 
 def main():
@@ -17,11 +17,13 @@ def main():
 	
 	# Scraping and database recording will run synchronously
 	# Text message notification will run asynchronously
-	t1 = Thread(target = get_prices_and_record_into_database(start_url))
-	t1.start()
-	if literal_eval(text_notification_on_or_off):
-		t2 = Thread(target = send_text_notification())
-		t2.start()
+	with ThreadPoolExecutor(max_workers=2) as executor:
+		future = executor.submit(get_prices_and_record_into_database, 
+			(start_url,))
+		if literal_eval(text_notification_on_or_off) == True:
+			future = executor.submit(send_text_notification)
+
+
 
 
 
