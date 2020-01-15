@@ -3,6 +3,7 @@ from utility_classes import send_text_notification
 from utility_classes import get_prices_and_record_into_database
 from concurrent.futures import ThreadPoolExecutor
 from ast import literal_eval
+from support_functions import create_session
 
 def main():
 	"""Main function to execute all code"""
@@ -14,19 +15,17 @@ def main():
 
 	# Get url of the starting page
 	start_url = get_startpage_url(currency)
+
+	# Create session for ORM
+	session = create_session()
 	
 	# Scraping and database recording will run synchronously
 	# Text message notification will run asynchronously
 	with ThreadPoolExecutor(max_workers=2) as executor:
 		future = executor.submit(get_prices_and_record_into_database, 
-			(start_url,))
+			(start_url, session))
 		if literal_eval(text_notification_on_or_off) == True:
-			future = executor.submit(send_text_notification)
-
-
-
-
-
+			future = executor.submit(send_text_notification, (session))
 
 if __name__ == '__main__':
 	main()
