@@ -37,9 +37,9 @@ class CurrencyPricesVolumes():
 		self.session = session
 
 	def record_into_database(self):
-		prices = self.get_prices()
-		volumes = self.get_volumes()
-		timestamp = self.get_timestamp()
+		coinsquare_prices = self.get_coinsquare_prices()
+		coinsquare_volumes = self.get_coinsquare_volumes()
+		coinsquare_timestamp = self.get_coinsquare_timestamp()
 
 	def get_prices(self):
 		pass
@@ -49,6 +49,21 @@ class CurrencyPricesVolumes():
 
 	def get_timestamp(self):
 		pass
+
+	def create_record(self):
+		entry = {
+		"RIPPLE":RIPPLE_cancelled_orders, \
+		"DASH":DASH_cancelled_orders, \
+		"ATOM":ATOM_cancelled_orders,
+		"MONERO":MONERO_cancelled_orders, \
+		"STELLAR":STELLAR_cancelled_orders, \
+		"ETC_CLASSIC":ETC_CLASSIC_cancelled_orders
+		}[self.currency]( \
+			timestamp = self.timestamp, \
+			txid = self.txid, \
+			order_type = self.order_type)
+		self.session.add(entry)
+		self.session.commit()
 
 
 class TextNotification():
@@ -61,3 +76,24 @@ class TextNotification():
 
 	def check_notification(self):
 		pass
+
+class CoinsquarePricesVolumes():
+	def __init__(self):
+		pass
+
+	def get_prices(self):
+		pass
+
+	def get_volumes(self):
+		pass
+
+class BittrexPricesVolumes():
+	def __init__(self):
+		pass
+
+	def get_prices(self):
+		pass
+
+	def get_volumes(self):
+		pass
+
