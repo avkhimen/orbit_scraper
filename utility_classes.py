@@ -35,20 +35,23 @@ class CurrencyPricesVolumes():
 	def __init__(self, start_url, session):
 		self.start_url = start_url
 		self.session = session
+		self.coinsquare_prices_volumes = CoinsquarePricesVolumes()
+		self.bittrex_prices_volumes = BittrexPricesVolumes()
 
 	def record_into_database(self):
-		coinsquare_prices = self.get_coinsquare_prices()
-		coinsquare_volumes = self.get_coinsquare_volumes()
-		coinsquare_timestamp = self.get_coinsquare_timestamp()
+		pass
 
 	def get_prices(self):
-		pass
+		coinsquare_prices = self.coinsquare_prices_volumes.get_prices()
+		bittrex_prices = self.bittrex_prices_volumes.get_prices()
+
+		return coinsquare_prices, bittrex_prices
 
 	def get_volumes(self):
-		pass
+		coinsquare_volumes = self.coinsquare_prices_volumes.get_volumes()
+		bittrex_volumes = self.bittrex_prices_volumes.get_volumes()
 
-	def get_timestamp(self):
-		pass
+		return coinsquare_volumes, bittrex_volumes
 
 	def create_record(self):
 		entry = {
@@ -97,3 +100,7 @@ class BittrexPricesVolumes():
 	def get_volumes(self):
 		pass
 
+class PriceVolumePair():
+	def __init__(self, price, volume):
+		self.price = price
+		self.volume = volume
