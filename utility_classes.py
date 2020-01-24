@@ -1,5 +1,10 @@
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 from datetime import datetime
+import requests
 
 def send_text_notification(session):
 	while True:
@@ -81,26 +86,130 @@ class TextNotification():
 		pass
 
 class CoinsquarePricesVolumes():
-	def __init__(self):
-		pass
+	def __init__(self, start_url):
+		self.start_url = start_url
 
-	def get_prices(self):
-		pass
+	def get_prices_volumes(self):
+	    """Returns the dict of latest DOGE price-volume pairs from Coinsquare exchange"""
 
-	def get_volumes(self):
-		pass
+	    options = Options()
+	    options.headless = True
+	    driver = webdriver.Firefox(options=options)
+
+	    price_volume_dict = {}
+
+	    try:
+	        driver.get(self.start_url)
+	        time.sleep(10)
+	    except Exception as e:
+	        print('Failed to load site 1st time')
+	        try:
+	            print('Attemping to load site again')
+	            driver.get(self.start_url)
+	            time.sleep(10)
+	        except Exception as e:
+	            print("Couldn't load site")
+	            return False
+
+	    #Get ask price and volume
+	    i = 1
+
+	    while i < 16:
+	        try:
+	            xpath_path = "/html/body/div[1]/div/div[2]/div[3]/div[2]/div"\
+	            "[2]/div/div/div[2]/div/div[3]/div[1]/div[" + str(i) + "]/div[1]/div[2]"
+	            ask_price = driver.find_element_by_xpath(xpath_path).get_attribute('innerHTML')
+	            
+	            xpath_path = "/html/body/div[1]/div/div[2]/div[3]/div[2]/div["\
+	            "2]/div/div/div[2]/div/div[3]/div[1]/div[" + str(i) + "]/div[1]/div[1]"
+	            ask_volume = driver.find_element_by_xpath(xpath_path).get_attribute('innerHTML')
+
+	            price_volume_dict['ask_' + str(16-i)] = {'volume': ask_volume, 'price': ask_price}
+
+	        except Exception as e:
+	            print(e)
+	            price_volume_dict['ask_' + str(16-i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
+	        finally:
+	            i += 1
+	            time.sleep(0.0)
+
+	    #Get bid price and volume
+	    i = 1
+
+	    while i < 16:
+	        try:
+	            xpath_path = "/html/body/div[1]/div/div[2]/div[3]/div[2]/div[2"\
+	            "]/div/div/div[2]/div/div[3]/div[3]/div[" + str(i) + "]/div[1]/div[2]"
+	            bid_price = driver.find_element_by_xpath(xpath_path).get_attribute('innerHTML')
+	            
+	            xpath_path = "/html/body/div[1]/div/div[2]/div[3]/div[2]/div[2]/"\
+	            "div/div/div[2]/div/div[3]/div[3]/div[" + str(i) + "]/div[1]/div[1]"
+	            bid_volume = driver.find_element_by_xpath(xpath_path).get_attribute('innerHTML')
+
+	            price_volume_dict['bid_' + str(i)] = {'volume': bid_volume, 'price': bid_price}
+
+	        except Exception as e:
+	            print(e)
+	            price_volume_dict['bid_' + str(i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
+	        finally:
+	            i += 1
+	            time.sleep(0.0)
+
+	    driver.close()
+
+	    #Get timestamp
+	    timestamp = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+	    return price_volume_dict, timestamp
 
 class BittrexPricesVolumes():
 	def __init__(self):
 		pass
 
-	def get_prices(self):
-		pass
+	def get_prices_volumes(self):
+		"""Returns the dict of latest DOGE price-volume pairs from Bittrex exchange"""
 
-	def get_volumes(self):
-		pass
+		r = requests.get('https://api.bittrex.com/api/v1.1/public/getorderbook?market=BTC-DOGE&type=both')
 
-class PriceVolumePair():
-	def __init__(self, price, volume):
-		self.price = price
-		self.volume = volume
+		order_book = r.json()['result']
+
+		price_volume_dict = {}
+
+		#Get ask price and volume
+		i = 1
+
+		while i < 16:
+		    try:
+		        ask_price = order_book['sell'][i]['Rate']
+		        
+		        ask_volume = order_book['sell'][i]['Quantity']
+
+		        price_volume_dict['ask_' + str(i)] = {'volume': ask_volume, 'price': ask_price}
+
+		    except Exception as e:
+		        print(e)
+		        price_volume_dict['ask_' + str(i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
+		    finally:
+		        i += 1
+
+		#Get bid price and volume
+		i = 1
+
+		while i < 16:
+		    try:
+		        bid_price = order_book['buy'][i]['Rate']
+		        
+		        bid_volume = order_book['buy'][i]['Quantity']
+
+		        price_volume_dict['bid_' + str(i)] = {'volume': bid_volume, 'price': bid_price}
+
+		    except Exception as e:
+		        print(e)
+		        price_volume_dict['bid_' + str(i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
+		    finally:
+		        i += 1
+
+		#Get timestamp
+		timestamp = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+		return price_volume_dict, timestamp
