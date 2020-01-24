@@ -1,6 +1,9 @@
 import argparse
 import bittrex.bittrex as bittrex
 import os
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base
 
 def get_input_args():
     """Returns input arguments for main file execution"""
@@ -18,7 +21,7 @@ def get_startpage_url(currency):
 
 def create_session():
 	"""Returns a session for database operations"""
-	engine = create_engine('sqlite:///coin_database_test.db')
+	engine = create_engine('sqlite:///doge_prices_volumes.db')
 	Base.metadata.bind = engine
 	DBsession = sessionmaker(bind=engine)
 	session = DBsession()

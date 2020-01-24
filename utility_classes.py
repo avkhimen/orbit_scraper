@@ -21,14 +21,28 @@ def send_text_notification(session):
 		finally:
 			True
 
+class TextNotification():
+	def __init__(self):
+		pass
+
+	def send_notification(self):
+		if self.check_notification():
+			pass
+
+	def check_notification(self):
+		pass
+
 def get_prices_and_record_into_database(start_url, session):
 	while True:
 		try:
-			currency_prices_and_volumes = CurrencyPricesVolumes(start_url, session)
+			currency_prices_volumes = CurrencyPricesVolumes(start_url, session)
+			print('Created currency_prices_volumes obj')
 		except Exception as e:
 			print(e)
 		else:
-			currency_prices_and_volumes.record_into_database()
+			#currency_prices_volumes.record_into_database()
+			print('CurrencyPricesVolumes obj has been created')
+			currency_prices_volumes.test()
 			time.sleep(2)
 			now = datetime.now()
 			current_time = now.strftime("%H:%M:%S")
@@ -40,32 +54,28 @@ class CurrencyPricesVolumes():
 	def __init__(self, start_url, session):
 		self.start_url = start_url
 		self.session = session
-		self.coinsquare_prices_volumes = CoinsquarePricesVolumes()
+		# with ThreadPoolExecutor(max_workers=2) as executor:
+		# 	future = executor.submit(CoinsquarePricesVolumes, (self.start_url))
+		# 	future = executor.submit(BittrexPricesVolumes)
+		self.coinsquare_prices_volumes = CoinsquarePricesVolumes(self.start_url)
 		self.bittrex_prices_volumes = BittrexPricesVolumes()
 
+	# def get_prices(self):
+	# 	coinsquare_prices, timestamp = self.coinsquare_prices_volumes.get_prices_volumes()
+	# 	bittrex_prices = self.bittrex_prices_volumes.get_prices()
+
+	# 	return coinsquare_prices, bittrex_prices
+
+	# def get_volumes(self):
+	# 	coinsquare_volumes = self.coinsquare_prices_volumes.get_volumes()
+	# 	bittrex_volumes = self.bittrex_prices_volumes.get_volumes()
+
+	# 	return coinsquare_volumes, bittrex_volumes
+
 	def record_into_database(self):
-		pass
-
-	def get_prices(self):
-		coinsquare_prices = self.coinsquare_prices_volumes.get_prices()
-		bittrex_prices = self.bittrex_prices_volumes.get_prices()
-
-		return coinsquare_prices, bittrex_prices
-
-	def get_volumes(self):
-		coinsquare_volumes = self.coinsquare_prices_volumes.get_volumes()
-		bittrex_volumes = self.bittrex_prices_volumes.get_volumes()
-
-		return coinsquare_volumes, bittrex_volumes
-
-	def create_record(self):
 		entry = {
-		"RIPPLE":RIPPLE_cancelled_orders, \
-		"DASH":DASH_cancelled_orders, \
-		"ATOM":ATOM_cancelled_orders,
-		"MONERO":MONERO_cancelled_orders, \
-		"STELLAR":STELLAR_cancelled_orders, \
-		"ETC_CLASSIC":ETC_CLASSIC_cancelled_orders
+		"COINSQUARE":RIPPLE_cancelled_orders, \
+		"DASH":DASH_cancelled_orders
 		}[self.currency]( \
 			timestamp = self.timestamp, \
 			txid = self.txid, \
@@ -73,17 +83,11 @@ class CurrencyPricesVolumes():
 		self.session.add(entry)
 		self.session.commit()
 
-
-class TextNotification():
-	def __init__(self):
+	def test(self):
 		pass
-
-	def send_notification(self):
-		if self.check_notification():
-			pass
-
-	def check_notification(self):
-		pass
+		# now = datetime.now()
+		# current_time = now.strftime("%H:%M:%S")
+		# print("Prices and database sleep 2s " + current_time)
 
 class CoinsquarePricesVolumes():
 	def __init__(self, start_url):
