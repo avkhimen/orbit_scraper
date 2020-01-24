@@ -1,6 +1,6 @@
 from support_functions import get_input_args, get_startpage_url
-from utility_classes import send_text_notification
-from utility_classes import get_prices_and_record_into_database
+from notification_message_utility_classes import send_text_notification
+from data_collection_utility_classes import get_prices_and_record_into_database
 from concurrent.futures import ThreadPoolExecutor
 from ast import literal_eval
 from support_functions import create_session
