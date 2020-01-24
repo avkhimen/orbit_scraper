@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 
-def send_text_notification(session):
+def send_text_notification():
 	while True:
 		try:
 			text_notification = TextNotification()
@@ -10,8 +10,7 @@ def send_text_notification(session):
 		else:
 			text_notification.check_notification()
 			time.sleep(10)
-			now = datetime.now()
-			current_time = now.strftime("%H:%M:%S")
+			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 			print("Send notification sleep 10s " + current_time)
 		finally:
 			True

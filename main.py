@@ -21,11 +21,15 @@ def main():
 	
 	# Scraping and database recording will run synchronously
 	# Text message notification will run asynchronously
+	# with ThreadPoolExecutor(max_workers=2) as executor:
+	# 	future = executor.submit(get_prices_and_record_into_database, (start_url, session))
+	# 	if literal_eval(text_notification_on_or_off) == True:
+	# 		future = executor.submit(send_text_notification, (session,))
+
 	with ThreadPoolExecutor(max_workers=2) as executor:
-		future = executor.submit(get_prices_and_record_into_database, 
-			(start_url, session))
+		future = executor.submit(get_prices_and_record_into_database, start_url, session)
 		if literal_eval(text_notification_on_or_off) == True:
-			future = executor.submit(send_text_notification, (session))
+			future = executor.submit(send_text_notification)
 
 if __name__ == '__main__':
 	main()

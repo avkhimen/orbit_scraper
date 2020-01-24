@@ -19,12 +19,17 @@ def get_startpage_url(currency):
 	"""Returns url of currency traded against Bitcoin"""
 	currency_url = "https://coinsquare.com/trade?pair=" + currency + "-BTC"
 
+	return currency_url
+
 def create_session():
 	"""Returns a session for database operations"""
-	engine = create_engine('sqlite:///doge_prices_volumes.db')
-	Base.metadata.bind = engine
-	DBsession = sessionmaker(bind=engine)
-	session = DBsession()
+	try:
+		engine = create_engine('sqlite:///doge_prices_volumes.db')
+		Base.metadata.bind = engine
+		DBsession = sessionmaker(bind=engine)
+		session = DBsession()
+	except Exception as e:
+		print(e)
 
 	return session
 
