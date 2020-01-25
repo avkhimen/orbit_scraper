@@ -1,5 +1,7 @@
 import time
 from datetime import datetime
+from database_setup import CoinsquareDogePricesVolumes
+from twilio.rest import Client
 
 def send_text_notification(session):
 	while True:
@@ -14,8 +16,6 @@ def send_text_notification(session):
 			print("Send notification sleep 10s " + current_time)
 		finally:
 			True
-
-def sent_text_notification_dev():
 
 	#class PriceVolumeComparisonData()
 		#def __init__(self):
@@ -39,18 +39,58 @@ def sent_text_notification_dev():
 	#Mark data as compared in price_volume table
 
 class TextNotification():
-	def __init__(self, session):
+	def __init__(self, session, price_volume_dict):
 		self.session = session
-		self.bittrex_price_ask_1 = bittrex_price_ask_1
-		self.bittrex_volume_ask_1 = bittrex_volume_ask_1
-		self.bittrex_price_bid_1 = bittrex_price_bid_1
-		self.bittrex_volume_bid_1 = bittrex_volume_bid_1
-		self.coinsquare_price_ask_1 = coinsquare_price_ask_1
-		self.coinsquare_volume_ask_1 = coinsquare_volume_ask_1
-		self.coinsquare_price_bid_1 = coinsquare_price_bid_1
-		self.coinsquare_volume_bid_1 = coinsquare_volume_bid_1
+		self.price_volume_dict = self.get_coinsquare_bittrex_prices_volumes()
+		self.bittrex_price_ask_1 = self.price_volume_dict['bittrex_price_ask_1']
+		self.bittrex_volume_ask_1 = self.price_volume_dict['bittrex_volume_ask_1']
+		self.bittrex_price_bid_1 = self.price_volume_dict['bittrex_price_bid_1']
+		self.bittrex_volume_bid_1 = self.price_volume_dict['bittrex_volume_bid_1']
+		self.coinsquare_price_ask_1 = self.price_volume_dict['coinsquare_price_ask_1']
+		self.coinsquare_volume_ask_1 = self.price_volume_dict['coinsquare_volume_ask_1']
+		self.coinsquare_price_bid_1 = self.price_volume_dict['coinsquare_price_bid_1']
+		self.coinsquare_volume_bid_1 = self.price_volume_dict['coinsquare_volume_bid_1']
 
+	def compare_bids_and_asks(self):
+		if self.no_scrape_errors():
+			if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
+				if self.bittrex_volume_ask_1 > 160000 and self.bittrex_volume_bid_1 > 160000 and self.coinsquare_volume_ask_1 > 160000 and self.coinsquare_volume_bid_1 > 160000:
+					return True
+			else:
+				return False
+		else:
+			return False
 
+	def no_scrape_errors(self):
+		price_list = [self.coinsquare_price_ask_1, self.bittrex_price_bid_1, self.coinsquare_price_bid_1, self.bittrex_price_ask_1]
+		if 'scrape_error' not in price_list:
+			return True
+		else:
+			return False
+
+	def get_coinsquare_bittrex_prices_volumes(self):
+		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
+		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
+		order_by(BittrexDogePricesVolumes.id.desc()).first()
+		prices_dict = {}
+		prices_dict['coinsquare_price_ask_1'] = coinsquare_last_entry.price_ask_1
+		prices_dict['coinsquare_price_bid_1'] = coinsquare_last_entry.price_bid_1
+		prices_dict['coinsquare_volume_ask_1'] = coinsquare_last_entry.volume_ask_1
+		prices_dict['coinsquare_volume_bid_1'] = coinsquare_last_entry.volume_bid_1
+		prices_dict['bittrex_price_ask_1'] = bittrex_last_entry.price_ask_1
+		prices_dict['bittrex_price_bid_1'] = bittrex_last_entry.price_bid_1
+		prices_dict['bittrex_volume_ask_1'] = bittrex_last_entry.volume_ask_1
+		prices_dict['bittrex_volume_bid_1'] = bittrex_last_entry.volume_bid_1
+
+		return prices_dict
+
+	def check_for_notification(self):
+		if self.compare_bids_and_asks():
+			self.send_notification()
+
+	def send_notification(self):
+		pass
 
 class TextNotification():
 	def __init__(self):

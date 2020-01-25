@@ -586,7 +586,9 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 1579796204322	Marionette	INFO	Listening on port 14365
 1579796204756	Marionette	WARN	TLS certificate errors will be ignored for this session
 JavaScript error: resource:///modules/BrowserUsageTelemetry.jsm, line 303: TypeError: this._timeouts.remove is not a function
-s" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.OS4Ub7eyzqcq"
+Exiting due to channel error.
+Exiting due to channel error.
+pData\\Local\\Temp\\rust_mozprofile.OS4Ub7eyzqcq"
 *** You are running in headless mode.
 1579796371438	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
 1579796371544	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
@@ -608,7 +610,9 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 1579796585451	Marionette	INFO	Listening on port 14608
 1579796585700	Marionette	WARN	TLS certificate errors will be ignored for this session
 JavaScript error: resource:///modules/BrowserUsageTelemetry.jsm, line 303: TypeError: this._timeouts.remove is not a function
-s" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.Jr9eZxoRTm91"
+Exiting due to channel error.
+Exiting due to channel error.
+pData\\Local\\Temp\\rust_mozprofile.Jr9eZxoRTm91"
 *** You are running in headless mode.
 1579796709605	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
 1579796709699	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
@@ -932,7 +936,9 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
 1579899873468	Marionette	INFO	Listening on port 27210
 1579899873972	Marionette	WARN	TLS certificate errors will be ignored for this session
-1579900571337	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.uWKWGPDJJ8Dz"
+Exiting due to channel error.
+Exiting due to channel error.
+gram Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.uWKWGPDJJ8Dz"
 *** You are running in headless mode.
 1579900572415	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
 1579900572730	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
@@ -1203,7 +1209,8 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 1579901780504	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: about:reader*
 JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
 1579901785927	Marionette	INFO	Listening on port 3862
-1579901875274	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.voX3yexRvK9N"
+Exiting due to channel error.
+	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.voX3yexRvK9N"
 *** You are running in headless mode.
 1579901876667	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
 1579901876913	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
@@ -1246,7 +1253,10 @@ JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't fin
 JavaScript error: resource://gre/modules/XULStore.jsm, line 66: Error: Can't find profile directory.
 1579901947628	Marionette	INFO	Listening on port 4222
 1579901947977	Marionette	WARN	TLS certificate errors will be ignored for this session
-1579902000906	mozrunner::runner	INFO	Running command: "C:\\Program Files\\Mozilla Firefox\\firefox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.1UghPt3h7GDP"
+Exiting due to channel error.
+Exiting due to channel error.
+Exiting due to channel error.
+refox.exe" "-marionette" "-headless" "-foreground" "-no-remote" "-profile" "C:\\Users\\MIDAV\\AppData\\Local\\Temp\\rust_mozprofile.1UghPt3h7GDP"
 *** You are running in headless mode.
 1579902002462	addons.webextension.doh-rollout@mozilla.org	WARN	Loading extension 'doh-rollout@mozilla.org': Reading manifest: Invalid extension permission: networkStatus
 1579902002753	addons.webextension.screenshots@mozilla.org	WARN	Loading extension 'screenshots@mozilla.org': Reading manifest: Invalid extension permission: mozillaAddons
