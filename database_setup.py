@@ -139,6 +139,25 @@ class BittrexDogePricesVolumes(Base):
     volume_bid_15 = Column(String(20))
     compared = Column(String(4))
 
+class BidAkPriceVolumeComparison(Base):
+    __tablename__ = "bid_ask_price_volume_comparison"
+
+    id = Column(Integer, primary_key=True)
+    timestamp = Column(String(25))
+
+    coinsquare_price_ask_1 = Column(String(20))
+    bittrex_price_ask_1 = Column(String(20))
+    coinsquare_volume_ask_1 = Column(String(20))
+    bittrex_volume_ask_1 = Column(String(20))
+
+    coinsquare_price_bid_1 = Column(String(20))
+    bittrex_price_bid_1 = Column(String(20))
+    coinsquare_volume_bid_1 = Column(String(20))
+    bittrex_volume_bid_1 = Column(String(20))
+
+    message_sent = Column(String(4))
+
+
 
 engine = create_engine('sqlite:///doge_prices_volumes.db')
 

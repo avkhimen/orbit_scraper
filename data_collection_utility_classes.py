@@ -7,7 +7,7 @@ from datetime import datetime
 import requests
 from concurrent.futures import ThreadPoolExecutor
 from pprint import pprint
-from database_setup import CoinsquareDogePricesVolumes
+from database_setup import CoinsquareDogePricesVolumes, BittrexDogePricesVolumes
 
 def get_prices_and_record_into_database(start_url, session):
 	while True:
@@ -17,7 +17,7 @@ def get_prices_and_record_into_database(start_url, session):
 		except Exception as e:
 			print(e)
 		else:
-			time.sleep(25)
+			time.sleep(30)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 			print("Prices and database sleep 25s " + current_time)
 		finally:
@@ -31,11 +31,87 @@ class CurrencyPricesVolumes():
 		self.bittrex_prices_volumes = BittrexPricesVolumes()
 
 	def record_into_database(self):
+
+		self.record_coinsquare_prices_and_volumes()
+		self.record_bittrex_prices_and_volumes()
+
+	def record_coinsquare_prices_and_volumes(self):
 		orderbook = self.coinsquare_prices_volumes.get_orderbook()
 
 		timestamp = self.coinsquare_prices_volumes.get_timestamp()
 
 		db_entry = CoinsquareDogePricesVolumes(
+			timestamp = timestamp,
+		    price_ask_15 = orderbook['ask_15']['price'],
+		    volume_ask_15 = orderbook['ask_15']['volume'],
+		    price_ask_14 = orderbook['ask_14']['price'],
+		    volume_ask_14 = orderbook['ask_14']['volume'],
+		    price_ask_13 = orderbook['ask_13']['price'],
+		    volume_ask_13 = orderbook['ask_13']['volume'],
+		    price_ask_12 = orderbook['ask_12']['price'],
+		    volume_ask_12= orderbook['ask_12']['volume'],
+		    price_ask_11 = orderbook['ask_11']['price'],
+		    volume_ask_11 = orderbook['ask_11']['volume'],
+		    price_ask_10 = orderbook['ask_10']['price'],
+		    volume_ask_10 = orderbook['ask_10']['volume'],
+		    price_ask_9 = orderbook['ask_9']['price'],
+		    volume_ask_9 = orderbook['ask_9']['volume'],
+		    price_ask_8 = orderbook['ask_8']['price'],
+		    volume_ask_8 = orderbook['ask_8']['volume'],
+		    price_ask_7 = orderbook['ask_7']['price'],
+		    volume_ask_7 = orderbook['ask_7']['volume'],
+		    price_ask_6 = orderbook['ask_6']['price'],
+		    volume_ask_6 = orderbook['ask_6']['volume'],
+		    price_ask_5 = orderbook['ask_5']['price'],
+		    volume_ask_5 = orderbook['ask_5']['volume'],
+		    price_ask_4 = orderbook['ask_4']['price'],
+		    volume_ask_4 = orderbook['ask_4']['volume'],
+		    price_ask_3 = orderbook['ask_3']['price'],
+		    volume_ask_3 = orderbook['ask_3']['volume'],
+		    price_ask_2 = orderbook['ask_2']['price'],
+		    volume_ask_2 = orderbook['ask_2']['volume'],
+		    price_ask_1 = orderbook['ask_1']['price'],
+		    volume_ask_1 = orderbook['ask_1']['volume'],
+		    price_bid_1 = orderbook['bid_1']['price'],
+		    volume_bid_1 = orderbook['bid_1']['volume'],
+		    price_bid_2 = orderbook['bid_2']['price'],
+		    volume_bid_2 = orderbook['bid_2']['volume'],
+		    price_bid_3 = orderbook['bid_3']['price'],
+		    volume_bid_3 = orderbook['bid_3']['volume'],
+		    price_bid_4 = orderbook['bid_4']['price'],
+		    volume_bid_4 = orderbook['bid_4']['volume'],
+		    price_bid_5 = orderbook['bid_5']['price'],
+		    volume_bid_5 = orderbook['bid_5']['volume'],
+		    price_bid_6 = orderbook['bid_6']['price'],
+		    volume_bid_6 = orderbook['bid_6']['volume'],
+		    price_bid_7 = orderbook['bid_7']['price'],
+		    volume_bid_7 = orderbook['bid_7']['volume'],
+		    price_bid_8 = orderbook['bid_8']['price'],
+		    volume_bid_8 = orderbook['bid_8']['volume'],
+		    price_bid_9 = orderbook['bid_9']['price'],
+		    volume_bid_9 = orderbook['bid_9']['volume'],
+		    price_bid_10 = orderbook['bid_10']['price'],
+		    volume_bid_10 = orderbook['bid_10']['volume'],
+		    price_bid_11 = orderbook['bid_11']['price'],
+		    volume_bid_11 = orderbook['bid_11']['volume'],
+		    price_bid_12 = orderbook['bid_12']['price'],
+		    volume_bid_12 = orderbook['bid_12']['volume'],
+		    price_bid_13 = orderbook['bid_13']['price'],
+		    volume_bid_13 = orderbook['bid_13']['volume'],
+		    price_bid_14 = orderbook['bid_14']['price'],
+		    volume_bid_14 = orderbook['bid_14']['volume'],
+		    price_bid_15 = orderbook['bid_15']['price'],
+		    volume_bid_15 = orderbook['bid_15']['volume'],
+		    compared = 'False')
+		self.session.add(db_entry)
+		self.session.commit()
+
+	def record_bittrex_prices_and_volumes(self):
+		orderbook = self.bittrex_prices_volumes.get_orderbook()
+
+		timestamp = self.bittrex_prices_volumes.get_timestamp()
+
+		db_entry = BittrexDogePricesVolumes(
 			timestamp = timestamp,
 		    price_ask_15 = orderbook['ask_15']['price'],
 		    volume_ask_15 = orderbook['ask_15']['volume'],
@@ -117,13 +193,13 @@ class CoinsquarePricesVolumes():
 
 	    try:
 	        driver.get(self.start_url)
-	        time.sleep(10)
+	        time.sleep(20)
 	    except Exception as e:
 	        print('Failed to load site 1st time')
 	        try:
 	            print('Attemping to load site again')
 	            driver.get(self.start_url)
-	            time.sleep(10)
+	            time.sleep(20)
 	        except Exception as e:
 	            print("Couldn't load site")
 	            return False
@@ -148,7 +224,6 @@ class CoinsquarePricesVolumes():
 	            price_volume_dict['ask_' + str(16-i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
 	        finally:
 	            i += 1
-	            time.sleep(0.0)
 
 	    #Get bid price and volume
 	    i = 1
@@ -170,7 +245,6 @@ class CoinsquarePricesVolumes():
 	            price_volume_dict['bid_' + str(i)] = {'volume': 'scrape_error', 'price': 'scrape_error'}
 	        finally:
 	            i += 1
-	            time.sleep(0.0)
 
 	    driver.close()
 
