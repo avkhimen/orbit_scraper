@@ -1,6 +1,8 @@
 import time
 from datetime import datetime
 from database_setup import CoinsquareDogePricesVolumes
+from database_setup import BittrexDogePricesVolumes
+from database_setup import BidAskPriceVolumeComparison
 from twilio.rest import Client
 
 ##########WILL REMOVE SOON##################################
@@ -12,7 +14,9 @@ def send_text_notification(session):
 		except Exception as e:
 			print(e)
 		else:
-			text_notification.check_notification()
+			#text_notification.check_notification()
+			text_notification.check_if_need_notification()
+			text_notification.update_database()
 			time.sleep(10)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 			print("Send notification sleep 10s " + current_time)
@@ -63,20 +67,20 @@ class TextNotification():
 		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
 		order_by(BittrexDogePricesVolumes.id.desc()).first()
 		prices_dict = {}
-		prices_dict['coinsquare_price_ask_1'] = coinsquare_last_entry.price_ask_1
-		prices_dict['coinsquare_price_bid_1'] = coinsquare_last_entry.price_bid_1
-		prices_dict['coinsquare_volume_ask_1'] = coinsquare_last_entry.volume_ask_1
-		prices_dict['coinsquare_volume_bid_1'] = coinsquare_last_entry.volume_bid_1
+		prices_dict['coinsquare_price_ask_1'] = float(coinsquare_last_entry.price_ask_1.replace(',',''))
+		prices_dict['coinsquare_price_bid_1'] = float(coinsquare_last_entry.price_bid_1.replace(',',''))
+		prices_dict['coinsquare_volume_ask_1'] = float(coinsquare_last_entry.volume_ask_1.replace(',',''))
+		prices_dict['coinsquare_volume_bid_1'] = float(coinsquare_last_entry.volume_bid_1.replace(',',''))
 		prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
-		prices_dict['bittrex_price_ask_1'] = bittrex_last_entry.price_ask_1
-		prices_dict['bittrex_price_bid_1'] = bittrex_last_entry.price_bid_1
-		prices_dict['bittrex_volume_ask_1'] = bittrex_last_entry.volume_ask_1
-		prices_dict['bittrex_volume_bid_1'] = bittrex_last_entry.volume_bid_1
+		prices_dict['bittrex_price_ask_1'] = float(bittrex_last_entry.price_ask_1.replace(',',''))
+		prices_dict['bittrex_price_bid_1'] = float(bittrex_last_entry.price_bid_1.replace(',',''))
+		prices_dict['bittrex_volume_ask_1'] = float(bittrex_last_entry.volume_ask_1.replace(',',''))
+		prices_dict['bittrex_volume_bid_1'] = float(bittrex_last_entry.volume_bid_1.replace(',',''))
 		prices_dict['bittrex_compared'] = bittrex_last_entry.compared
 
 		return prices_dict
 
-	def check_for_notification(self):
+	def check_if_need_notification(self):
 		if self.compare_bids_and_asks():
 			self.send_notification()
 			return True
@@ -89,8 +93,6 @@ class TextNotification():
 				if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
 					if self.bittrex_volume_ask_1 > 160000 and self.bittrex_volume_bid_1 > 160000 and self.coinsquare_volume_ask_1 > 160000 and self.coinsquare_volume_bid_1 > 160000:
 						return True
-				else:
-					return False
 		else:
 			return False
 
@@ -118,28 +120,66 @@ class TextNotification():
 			return "Buy on Coinsquare for {} and sell on Bittrex for {}".format(self.coinsquare_price_bid_1, self.bittrex_price_ask_1)
 
 	def send_message(self, message):
-		account_sid = 'AC9ab597ea6933a257d5da1e1427ee9934'
-		auth_token = 'a8349eb77994c539c8c4cbe1641bb6d4'
-		Client = Client(account_sid, auth_token)
+		try:
+			account_sid = 'AC9ab597ea6933a257d5da1e1427ee9934'
+			auth_token = 'a8349eb77994c539c8c4cbe1641bb6d4'
+			Client = Client(account_sid, auth_token)
 
-		text_message = client.messages \
-                .create(
-                     body=message,
-                     from_='+17068014028',
-                     to='+17809321716'
-                 )
+			text_message = client.messages.create(body=message, from_='+17068014028', to='+17809321716')
+		except Exception as e:
+			print(e)
+		else:
+			return True
+
+    def update_database(self, notification_sent):
+    	self.update_price_volume_tables(self, notification_sent)
+    	self.record_into_comparison_table(self, notification_sent)
 
     def update_price_volume_tables(self, notification_sent):
     	if notification_sent:
-			compared = True
+			compared = 'message_sent'
 		else:
-			compared = False
+			compared = 'message_not_sent'
+
+		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
+		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
+		order_by(BittrexDogePricesVolumes.id.desc()).first()
+		
+		coinsquare_last_entry.compared = compared
+		bittrex_last_entry.compared = compared
+
+		self.session.commit()
+
 
 	def record_into_comparison_table(self, notification_sent):
 		if notification_sent:
 			compared = True
 		else:
 			compared = False
+
+	    timestamp = self.get_current_time_timestamp()
+
+		db_entry = BidAskPriceVolumeComparison(
+			timestamp = timestamp,
+		    coinsquare_price_ask_1 = self.coinsquare_price_ask_1,
+		    bittrex_price_ask_1 = self.bittrex_price_ask_1,
+		    coinsquare_volume_ask_1 = self.coinsquare_volume_ask_1,
+		    bittrex_volume_ask_1 = self.bittrex_volume_ask_1,
+		    coinsquare_price_bid_1 = self.coinsquare_price_bid_1,
+		    bittrex_price_bid_1 = self.bittrex_price_bid_1,
+		    coinsquare_volume_bid_1 = self.coinsquare_volume_bid_1,
+		    bittrex_volume_bid_1 = self.bitttrex_volume_bid_1,
+		    message_sent = compared)
+
+		self.session.add(db_entry)
+		self.session.commit()
+
+	def get_current_time_timestamp(self):
+
+		timestamp = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+
+		return timestamp
 
 ##################WILL REMOVE SOON################################
 
