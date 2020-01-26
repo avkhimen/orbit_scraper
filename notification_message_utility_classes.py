@@ -3,6 +3,8 @@ from datetime import datetime
 from database_setup import CoinsquareDogePricesVolumes
 from twilio.rest import Client
 
+##########WILL REMOVE SOON##################################
+
 def send_text_notification(session):
 	while True:
 		try:
@@ -16,6 +18,8 @@ def send_text_notification(session):
 			print("Send notification sleep 10s " + current_time)
 		finally:
 			True
+
+##########WILL REMOVE SOON##################################
 
 	#class PriceVolumeComparisonData()
 		#def __init__(self):
@@ -41,23 +45,52 @@ def send_text_notification(session):
 class TextNotification():
 	def __init__(self, session, price_volume_dict):
 		self.session = session
-		self.price_volume_dict = self.get_coinsquare_bittrex_prices_volumes()
+		self.price_volume_dict = self.get_coinsquare_bittrex_prices_volumes_compared()
 		self.bittrex_price_ask_1 = self.price_volume_dict['bittrex_price_ask_1']
 		self.bittrex_volume_ask_1 = self.price_volume_dict['bittrex_volume_ask_1']
 		self.bittrex_price_bid_1 = self.price_volume_dict['bittrex_price_bid_1']
 		self.bittrex_volume_bid_1 = self.price_volume_dict['bittrex_volume_bid_1']
+		self.bittrex_compared = self.price_volume_dict['bittrex_compared']
 		self.coinsquare_price_ask_1 = self.price_volume_dict['coinsquare_prpwdice_ask_1']
 		self.coinsquare_volume_ask_1 = self.price_volume_dict['coinsquare_volume_ask_1']
 		self.coinsquare_price_bid_1 = self.price_volume_dict['coinsquare_price_bid_1']
 		self.coinsquare_volume_bid_1 = self.price_volume_dict['coinsquare_volume_bid_1']
+		self.coinsquare_compared = self.price_volume_dict['coinsquare_compared']
+
+	def get_coinsquare_bittrex_prices_volumes_compared(self):
+		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
+		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
+		order_by(BittrexDogePricesVolumes.id.desc()).first()
+		prices_dict = {}
+		prices_dict['coinsquare_price_ask_1'] = coinsquare_last_entry.price_ask_1
+		prices_dict['coinsquare_price_bid_1'] = coinsquare_last_entry.price_bid_1
+		prices_dict['coinsquare_volume_ask_1'] = coinsquare_last_entry.volume_ask_1
+		prices_dict['coinsquare_volume_bid_1'] = coinsquare_last_entry.volume_bid_1
+		prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
+		prices_dict['bittrex_price_ask_1'] = bittrex_last_entry.price_ask_1
+		prices_dict['bittrex_price_bid_1'] = bittrex_last_entry.price_bid_1
+		prices_dict['bittrex_volume_ask_1'] = bittrex_last_entry.volume_ask_1
+		prices_dict['bittrex_volume_bid_1'] = bittrex_last_entry.volume_bid_1
+		prices_dict['bittrex_compared'] = bittrex_last_entry.compared
+
+		return prices_dict
+
+	def check_for_notification(self):
+		if self.compare_bids_and_asks():
+			self.send_notification()
+			return True
+		else:
+			return False
 
 	def compare_bids_and_asks(self):
 		if self.no_scrape_errors():
-			if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
-				if self.bittrex_volume_ask_1 > 160000 and self.bittrex_volume_bid_1 > 160000 and self.coinsquare_volume_ask_1 > 160000 and self.coinsquare_volume_bid_1 > 160000:
-					return True
-			else:
-				return False
+			if self.data_not_looked_at():
+				if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
+					if self.bittrex_volume_ask_1 > 160000 and self.bittrex_volume_bid_1 > 160000 and self.coinsquare_volume_ask_1 > 160000 and self.coinsquare_volume_bid_1 > 160000:
+						return True
+				else:
+					return False
 		else:
 			return False
 
@@ -68,26 +101,11 @@ class TextNotification():
 		else:
 			return False
 
-	def get_coinsquare_bittrex_prices_volumes(self):
-		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
-		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
-		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
-		order_by(BittrexDogePricesVolumes.id.desc()).first()
-		prices_dict = {}
-		prices_dict['coinsquare_price_ask_1'] = coinsquare_last_entry.price_ask_1
-		prices_dict['coinsquare_price_bid_1'] = coinsquare_last_entry.price_bid_1
-		prices_dict['coinsquare_volume_ask_1'] = coinsquare_last_entry.volume_ask_1
-		prices_dict['coinsquare_volume_bid_1'] = coinsquare_last_entry.volume_bid_1
-		prices_dict['bittrex_price_ask_1'] = bittrex_last_entry.price_ask_1
-		prices_dict['bittrex_price_bid_1'] = bittrex_last_entry.price_bid_1
-		prices_dict['bittrex_volume_ask_1'] = bittrex_last_entry.volume_ask_1
-		prices_dict['bittrex_volume_bid_1'] = bittrex_last_entry.volume_bid_1
-
-		return prices_dict
-
-	def check_for_notification(self):
-		if self.compare_bids_and_asks():
-			self.send_notification()
+	def data_not_looked_at(self):
+		if self.bittrex_compared == 'False' and self.coinsquare_compared == 'False':
+			return True
+		else:
+			return False
 
 	def send_notification(self):
 		message = self.construct_message()
@@ -95,9 +113,9 @@ class TextNotification():
 
 	def construct_message(self):
 		if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1:
-			return "Buy on Bittrex and sell on Coinsquare"
+			return "Buy on Bittrex for {} and sell on Coinsquare for {}".format(self.bittrex_price_bid_1, self.coinsquare_price_ask_1)
 		elif self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
-			return "Buy on Coinsquare and sell on Bittrex"
+			return "Buy on Coinsquare for {} and sell on Bittrex for {}".format(self.coinsquare_price_bid_1, self.bittrex_price_ask_1)
 
 	def send_message(self, message):
 		account_sid = 'AC9ab597ea6933a257d5da1e1427ee9934'
@@ -110,6 +128,20 @@ class TextNotification():
                      from_='+17068014028',
                      to='+17809321716'
                  )
+
+    def update_price_volume_tables(self, notification_sent):
+    	if notification_sent:
+			compared = True
+		else:
+			compared = False
+
+	def record_into_comparison_table(self, notification_sent):
+		if notification_sent:
+			compared = True
+		else:
+			compared = False
+
+##################WILL REMOVE SOON################################
 
 class TextNotification():
 	def __init__(self):
