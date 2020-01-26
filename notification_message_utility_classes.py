@@ -46,7 +46,7 @@ class TextNotification():
 		self.bittrex_volume_ask_1 = self.price_volume_dict['bittrex_volume_ask_1']
 		self.bittrex_price_bid_1 = self.price_volume_dict['bittrex_price_bid_1']
 		self.bittrex_volume_bid_1 = self.price_volume_dict['bittrex_volume_bid_1']
-		self.coinsquare_price_ask_1 = self.price_volume_dict['coinsquare_price_ask_1']
+		self.coinsquare_price_ask_1 = self.price_volume_dict['coinsquare_prpwdice_ask_1']
 		self.coinsquare_volume_ask_1 = self.price_volume_dict['coinsquare_volume_ask_1']
 		self.coinsquare_price_bid_1 = self.price_volume_dict['coinsquare_price_bid_1']
 		self.coinsquare_volume_bid_1 = self.price_volume_dict['coinsquare_volume_bid_1']
@@ -90,7 +90,26 @@ class TextNotification():
 			self.send_notification()
 
 	def send_notification(self):
-		pass
+		message = self.construct_message()
+		self.send_message(message)
+
+	def construct_message(self):
+		if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1:
+			return "Buy on Bittrex and sell on Coinsquare"
+		elif self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
+			return "Buy on Coinsquare and sell on Bittrex"
+
+	def send_message(self, message):
+		account_sid = 'AC9ab597ea6933a257d5da1e1427ee9934'
+		auth_token = 'a8349eb77994c539c8c4cbe1641bb6d4'
+		Client = Client(account_sid, auth_token)
+
+		text_message = client.messages \
+                .create(
+                     body=message,
+                     from_='+17068014028',
+                     to='+17809321716'
+                 )
 
 class TextNotification():
 	def __init__(self):
