@@ -2,8 +2,9 @@ import time
 from datetime import datetime
 from database_setup import CoinsquareDogePricesVolumes
 from database_setup import BittrexDogePricesVolumes
-from database_setup import BidAskPriceVolumeComparison
+from database_setup import BidAkPriceVolumeComparison
 from twilio.rest import Client
+from support_functions import ACCOUNT_SID, AUTH_TOKEN
 
 ##########WILL REMOVE SOON##################################
 
@@ -15,8 +16,10 @@ def send_text_notification(session):
 			print(e)
 		else:
 			#text_notification.check_notification()
-			text_notification.check_if_need_notification()
-			text_notification.update_database()
+			#Code here may not work
+			notification_sent = text_notification.check_if_need_notification()
+			text_notification.update_database(notification_sent)
+			#Code here may not work
 			time.sleep(10)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 			print("Send notification sleep 10s " + current_time)
@@ -121,8 +124,8 @@ class TextNotification():
 
 	def send_message(self, message):
 		try:
-			account_sid = 'AC9ab597ea6933a257d5da1e1427ee9934'
-			auth_token = 'a8349eb77994c539c8c4cbe1641bb6d4'
+			account_sid = ACCOUNT_SID
+			auth_token = AUTH_TOKEN
 			Client = Client(account_sid, auth_token)
 
 			text_message = client.messages.create(body=message, from_='+17068014028', to='+17809321716')
@@ -131,20 +134,18 @@ class TextNotification():
 		else:
 			return True
 
-    def update_database(self, notification_sent):
-    	self.update_price_volume_tables(self, notification_sent)
-    	self.record_into_comparison_table(self, notification_sent)
+	def update_database(self, notification_sent):
+		self.update_price_volume_tables(self, notification_sent)
+		self.record_into_comparison_table(self, notification_sent)
 
-    def update_price_volume_tables(self, notification_sent):
-    	if notification_sent:
+	def update_price_volume_tables(self, notification_sent):
+		if notification_sent:
 			compared = 'message_sent'
 		else:
 			compared = 'message_not_sent'
 
-		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
-		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
-		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
-		order_by(BittrexDogePricesVolumes.id.desc()).first()
+		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).order_by(BittrexDogePricesVolumes.id.desc()).first()
 		
 		coinsquare_last_entry.compared = compared
 		bittrex_last_entry.compared = compared
@@ -158,9 +159,9 @@ class TextNotification():
 		else:
 			compared = False
 
-	    timestamp = self.get_current_time_timestamp()
-
-		db_entry = BidAskPriceVolumeComparison(
+		timestamp = self.get_current_time_timestamp()
+		
+		db_entry = BidAkPriceVolumeComparison(
 			timestamp = timestamp,
 		    coinsquare_price_ask_1 = self.coinsquare_price_ask_1,
 		    bittrex_price_ask_1 = self.bittrex_price_ask_1,
