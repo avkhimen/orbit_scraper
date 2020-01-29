@@ -3,9 +3,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from database_setup import Base
 
-ACCOUNT_SID = 'AC9ab597ea6933a257d5da1e1427ee9934'
-AUTH_TOKEN = 'a8349eb77994c539c8c4cbe1641bb6d4'
-
 def get_input_args():
     """Returns input arguments for main file execution"""
     parser = argparse.ArgumentParser()

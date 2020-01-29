@@ -17,9 +17,10 @@ def get_prices_and_record_into_database(start_url, session):
 		except Exception as e:
 			print(e)
 		else:
-			time.sleep(30)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-			print("Prices and database sleep 25s " + current_time)
+			print(current_time + " Collecting prices/volumes"\
+			" task finished. Sleep 25s")
+			time.sleep(30)
 		finally:
 			True
 

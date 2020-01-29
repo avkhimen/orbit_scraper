@@ -4,26 +4,24 @@ from database_setup import CoinsquareDogePricesVolumes
 from database_setup import BittrexDogePricesVolumes
 from database_setup import BidAkPriceVolumeComparison
 from twilio.rest import Client
-from support_functions import ACCOUNT_SID, AUTH_TOKEN
+from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN
 from pprint import pprint
 
 def send_text_notification(session):
 	while True:
 		try:
 			text_notification = TextNotification(session)
-			text_notification.test_method()
 		except Exception as e:
 			print(e)
 		else:
 			notification_sent = text_notification.check_if_need_notification()
-			print('Printing if notification needs to be sent: ', notification_sent)
+			print('________Printing if notification needs to be sent: ', notification_sent)
 			if notification_sent:
 				text_notification.send_notification()
 			text_notification.update_database(notification_sent)
-			#Code here may not work
-			time.sleep(20)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-			print("Send notification sleep 20s " + current_time)
+			print(current_time + " Notification task finished. Sleep 20s.")
+			time.sleep(20)
 		finally:
 			True
 
@@ -41,10 +39,6 @@ class TextNotification():
 		self.coinsquare_price_bid_1 = self.price_volume_dict['coinsquare_price_bid_1']
 		self.coinsquare_volume_bid_1 = self.price_volume_dict['coinsquare_volume_bid_1']
 		self.coinsquare_compared = self.price_volume_dict['coinsquare_compared']
-
-	def test_method(self):
-		print("Test method execution")
-		pprint(self.price_volume_dict)
 
 	def get_coinsquare_bittrex_prices_volumes_compared(self):
 		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
@@ -72,14 +66,14 @@ class TextNotification():
 			return x
 
 	def check_if_need_notification(self):
-		print('Check if need notification method about to execute')
+		print('________Check if need notification method about to execute')
 		if self.compare_bids_and_asks():
 			return True
 		else:
 			return False
 
 	def compare_bids_and_asks(self):
-		print('Compare bids and asks method executing')
+		print('________Compare bids and asks method executing')
 		if self.no_scrape_errors():
 			if self.data_not_looked_at():
 				if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
@@ -89,7 +83,7 @@ class TextNotification():
 			return False
 
 	def no_scrape_errors(self):
-		print('No scrape errors method executing')
+		print('________No scrape errors method executing')
 		price_list = [self.coinsquare_price_ask_1, self.bittrex_price_bid_1, self.coinsquare_price_bid_1, self.bittrex_price_ask_1]
 		if 'scrape_error' not in price_list:
 			return True
@@ -97,7 +91,7 @@ class TextNotification():
 			return False
 
 	def data_not_looked_at(self):
-		print('Data not looked at method executing')
+		print('________Data not looked at method executing')
 		if self.bittrex_compared == 'False' and self.coinsquare_compared == 'False':
 			return True
 		else:
@@ -114,19 +108,20 @@ class TextNotification():
 			return "Buy on Bittrex for {} and sell on Coinsquare for {}".format(self.bittrex_price_ask_1, self.coinsquare_price_bid_1)
 
 	def send_message(self, message):
+		print('________Send message method executing')
 		try:
 			account_sid = ACCOUNT_SID
 			auth_token = AUTH_TOKEN
-			Client = Client(account_sid, auth_token)
+			client = Client(account_sid, auth_token)
 
-			text_message = client.messages.create(body=message, from_='+17068014028', to='+17809321716')
+			text_message = client.messages.create(body=message, from_='+12012124816', to='+17809321716')
 		except Exception as e:
 			print(e)
 		else:
 			return True
 
 	def update_database(self, notification_sent):
-		print('Update database method executing')
+		print('________Update database method executing')
 		try:
 			self.update_price_volume_tables(self, notification_sent)
 		except Exception as e:
@@ -135,11 +130,11 @@ class TextNotification():
 			self.record_into_comparison_table(self, notification_sent)
 		except Exception as e:
 			print(e)
-		print('Update database method finished')
+		print('________Update database method finished')
 
 	@staticmethod
 	def update_price_volume_tables(self, notification_sent):
-		print('Update price volume method executing')
+		print('________Update price volume method executing')
 		message_sent_update = 'message_not_sent'
 		if notification_sent:
 			message_sent_update = 'message_sent'
@@ -155,7 +150,7 @@ class TextNotification():
 
 	@staticmethod
 	def record_into_comparison_table(self, notification_sent):
-		print('Record into comparison table method executing')
+		print('________Record into comparison table method executing')
 		compared = 'False'
 		if notification_sent:
 			compared = 'True'
