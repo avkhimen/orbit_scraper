@@ -155,7 +155,7 @@ class BidAkPriceVolumeComparison(Base):
     coinsquare_volume_bid_1 = Column(String(20))
     bittrex_volume_bid_1 = Column(String(20))
 
-    message_sent = Column(String(4))
+    message_sent = Column(String(5))
 
 
 

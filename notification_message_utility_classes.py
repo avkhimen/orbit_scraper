@@ -7,8 +7,6 @@ from twilio.rest import Client
 from support_functions import ACCOUNT_SID, AUTH_TOKEN
 from pprint import pprint
 
-##########WILL REMOVE SOON##################################
-
 def send_text_notification(session):
 	while True:
 		try:
@@ -17,42 +15,17 @@ def send_text_notification(session):
 		except Exception as e:
 			print(e)
 		else:
-			#text_notification.check_notification()
-			#Code here may not work
 			notification_sent = text_notification.check_if_need_notification()
-			print(notification_sent)
+			print('Printing if notification needs to be sent: ', notification_sent)
 			if notification_sent:
 				text_notification.send_notification()
 			text_notification.update_database(notification_sent)
 			#Code here may not work
-			time.sleep(10)
+			time.sleep(20)
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
-			print("Send notification sleep 10s " + current_time)
+			print("Send notification sleep 20s " + current_time)
 		finally:
 			True
-
-##########WILL REMOVE SOON##################################
-
-	#class PriceVolumeComparisonData()
-		#def __init__(self):
-			#Get data from price_volume table
-			#self.bittrex_ask_1_price = bittrex_ask_1_price
-			#self.bittrex_bid_1_price = bittrex_ask_1_price
-		#def compare_data(self):
-			#Compare bid ask data from price_volume table
-			# if bittrex_bid_1_volume > 160,000 dogecoin and 
-			#return True/False
-	#Determine if message must be sent
-		#def send_message_or_not():
-			#if compare_date():
-				#send_text_message()
-	#Sent message if necessary
-		#def send_text_message(self):
-			#Use twilio api to send text message
-			#Return True/False
-	#Push data into comparison table
-
-	#Mark data as compared in price_volume table
 
 class TextNotification():
 	def __init__(self, session):
@@ -136,9 +109,9 @@ class TextNotification():
 
 	def construct_message(self):
 		if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1:
-			return "Buy on Bittrex for {} and sell on Coinsquare for {}".format(self.bittrex_price_bid_1, self.coinsquare_price_ask_1)
+			return "Buy on Coinsquare for {} and sell on Bittrex for {}".format(self.coinsquare_price_ask_1, self.bittrex_price_bid_1)
 		elif self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
-			return "Buy on Coinsquare for {} and sell on Bittrex for {}".format(self.coinsquare_price_bid_1, self.bittrex_price_ask_1)
+			return "Buy on Bittrex for {} and sell on Coinsquare for {}".format(self.bittrex_price_ask_1, self.coinsquare_price_bid_1)
 
 	def send_message(self, message):
 		try:
@@ -156,18 +129,21 @@ class TextNotification():
 		print('Update database method executing')
 		try:
 			self.update_price_volume_tables(self, notification_sent)
+		except Exception as e:
+			print(e)
+		try:
 			self.record_into_comparison_table(self, notification_sent)
 		except Exception as e:
 			print(e)
 		print('Update database method finished')
 
-	@classmethod
+	@staticmethod
 	def update_price_volume_tables(self, notification_sent):
 		print('Update price volume method executing')
+		message_sent_update = 'message_not_sent'
 		if notification_sent:
 			message_sent_update = 'message_sent'
-		else:
-			message_sent_update = 'message_not_sent'
+			
 
 		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).order_by(CoinsquareDogePricesVolumes.id.desc()).first()
 		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).order_by(BittrexDogePricesVolumes.id.desc()).first()
@@ -177,12 +153,12 @@ class TextNotification():
 
 		self.session.commit()
 
+	@staticmethod
 	def record_into_comparison_table(self, notification_sent):
 		print('Record into comparison table method executing')
+		compared = 'False'
 		if notification_sent:
-			compared = True
-		else:
-			compared = False
+			compared = 'True'
 
 		timestamp = self.get_current_time_timestamp()
 		
@@ -195,7 +171,7 @@ class TextNotification():
 		    coinsquare_price_bid_1 = self.coinsquare_price_bid_1,
 		    bittrex_price_bid_1 = self.bittrex_price_bid_1,
 		    coinsquare_volume_bid_1 = self.coinsquare_volume_bid_1,
-		    bittrex_volume_bid_1 = self.bitttrex_volume_bid_1,
+		    bittrex_volume_bid_1 = self.bittrex_volume_bid_1,
 		    message_sent = compared)
 
 		self.session.add(db_entry)
@@ -206,16 +182,3 @@ class TextNotification():
 		timestamp = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 
 		return timestamp
-
-##################WILL REMOVE SOON################################
-
-# class TextNotification():
-# 	def __init__(self):
-# 		pass
-
-# 	def send_notification(self):
-# 		if self.check_notification():
-# 			pass
-
-# 	def check_notification(self):
-# 		pass

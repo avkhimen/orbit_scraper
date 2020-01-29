@@ -16,15 +16,18 @@ def main():
 	# Get url of the starting page
 	start_url = get_startpage_url(currency)
 
-	# Create session for ORM
-	session = create_session()
+	# Create session for data collection
+	data_collection_session = create_session()
+
+	# Create session for data collection
+	text_notification_session = create_session()
 	
 	# Scraping and database recording will run synchronously
 	# Text message notification will run asynchronously
 	with ThreadPoolExecutor(max_workers=2) as executor:
-		future = executor.submit(get_prices_and_record_into_database, start_url, session)
+		future = executor.submit(get_prices_and_record_into_database, start_url, data_collection_session)
 		if literal_eval(text_notification_on_or_off) == True:
-			future = executor.submit(send_text_notification, session)
+			future = executor.submit(send_text_notification, text_notification_session)
 
 if __name__ == '__main__':
 	main()
