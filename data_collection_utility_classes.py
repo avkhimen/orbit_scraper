@@ -247,7 +247,7 @@ class CoinsquarePricesVolumes():
 	        finally:
 	            i += 1
 
-	    driver.close()
+	    driver.quit()
 
 	    #Get timestamp
 	    timestamp = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
