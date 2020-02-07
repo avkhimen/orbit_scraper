@@ -9,7 +9,7 @@ import sys
 
 sys.path.append('../')
 
-from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN, from_number, to_number
+from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN, FROM_NUMBER, TO_NUMBER
 
 def send_text_notification(session):
 	while True:
@@ -125,9 +125,11 @@ class TextNotification():
 		try:
 			account_sid = ACCOUNT_SID
 			auth_token = AUTH_TOKEN
+			from_number = FROM_NUMBER
+			to_number = TO_NUMBER
 			client = Client(account_sid, auth_token)
 
-			text_message = client.messages.create(body=message, from_='+15872063243', to='+17809321716')
+			text_message = client.messages.create(body=message, from_=from_number, to=to_number)
 		except Exception as e:
 			print(e)
 		else:
