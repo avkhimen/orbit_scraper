@@ -4,8 +4,12 @@ from database_setup import CoinsquareDogePricesVolumes
 from database_setup import BittrexDogePricesVolumes
 from database_setup import BidAkPriceVolumeComparison
 from twilio.rest import Client
-from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN
 from pprint import pprint
+import sys
+
+sys.path.append('../')
+
+from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN
 
 def send_text_notification(session):
 	while True:
@@ -14,11 +18,12 @@ def send_text_notification(session):
 		except Exception as e:
 			print(e)
 		else:
-			notification_sent = text_notification.check_if_need_notification()
+			need_notification = text_notification.check_if_need_notification()
 			print('________Printing if notification needs to be sent: ', notification_sent)
-			if notification_sent:
+			if need_notification:
 				text_notification.send_notification()
-			text_notification.update_database(notification_sent)
+			text_notification.update_database(need_notification)
+
 			current_time = datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
 			print(current_time + " Notification task finished. Sleep 20s.")
 			time.sleep(20)
@@ -120,23 +125,23 @@ class TextNotification():
 		else:
 			return True
 
-	def update_database(self, notification_sent):
+	def update_database(self, need_notification):
 		print('________Update database method executing')
 		try:
-			self.update_price_volume_tables(self, notification_sent)
+			self.update_price_volume_tables(self, need_notification)
 		except Exception as e:
 			print(e)
 		try:
-			self.record_into_comparison_table(self, notification_sent)
+			self.record_into_comparison_table(self, need_notification)
 		except Exception as e:
 			print(e)
 		print('________Update database method finished')
 
 	@staticmethod
-	def update_price_volume_tables(self, notification_sent):
+	def update_price_volume_tables(self, need_notification):
 		print('________Update price volume method executing')
 		message_sent_update = 'message_not_sent'
-		if notification_sent:
+		if need_notification:
 			message_sent_update = 'message_sent'
 			
 
@@ -149,10 +154,10 @@ class TextNotification():
 		self.session.commit()
 
 	@staticmethod
-	def record_into_comparison_table(self, notification_sent):
+	def record_into_comparison_table(self, need_notification):
 		print('________Record into comparison table method executing')
 		compared = 'False'
-		if notification_sent:
+		if need_notification:
 			compared = 'True'
 
 		timestamp = self.get_current_time_timestamp()
