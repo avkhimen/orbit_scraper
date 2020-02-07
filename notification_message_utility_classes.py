@@ -9,7 +9,7 @@ import sys
 
 sys.path.append('../')
 
-from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN
+from keys.twilio_sid_token import ACCOUNT_SID, AUTH_TOKEN, from_number, to_number
 
 def send_text_notification(session):
 	while True:
@@ -19,7 +19,7 @@ def send_text_notification(session):
 			print(e)
 		else:
 			need_notification = text_notification.check_if_need_notification()
-			print('________Printing if notification needs to be sent: ', notification_sent)
+			print('________Printing if notification needs to be sent: ', need_notification)
 			if need_notification:
 				text_notification.send_notification()
 			text_notification.update_database(need_notification)
@@ -44,23 +44,27 @@ class TextNotification():
 		self.coinsquare_price_bid_1 = self.price_volume_dict['coinsquare_price_bid_1']
 		self.coinsquare_volume_bid_1 = self.price_volume_dict['coinsquare_volume_bid_1']
 		self.coinsquare_compared = self.price_volume_dict['coinsquare_compared']
+		print(self.price_volume_dict)
 
 	def get_coinsquare_bittrex_prices_volumes_compared(self):
-		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
-		order_by(CoinsquareDogePricesVolumes.id.desc()).first()
-		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
-		order_by(BittrexDogePricesVolumes.id.desc()).first()
-		prices_dict = {}
-		prices_dict['coinsquare_price_ask_1'] = self.convert_to_float(coinsquare_last_entry.price_ask_1)
-		prices_dict['coinsquare_price_bid_1'] = self.convert_to_float(coinsquare_last_entry.price_bid_1)
-		prices_dict['coinsquare_volume_ask_1'] = self.convert_to_float(coinsquare_last_entry.volume_ask_1)
-		prices_dict['coinsquare_volume_bid_1'] = self.convert_to_float(coinsquare_last_entry.volume_bid_1)
-		prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
-		prices_dict['bittrex_price_ask_1'] = self.convert_to_float(bittrex_last_entry.price_ask_1)
-		prices_dict['bittrex_price_bid_1'] = self.convert_to_float(bittrex_last_entry.price_bid_1)
-		prices_dict['bittrex_volume_ask_1'] = self.convert_to_float(bittrex_last_entry.volume_ask_1)
-		prices_dict['bittrex_volume_bid_1'] = self.convert_to_float(bittrex_last_entry.volume_bid_1)
-		prices_dict['bittrex_compared'] = bittrex_last_entry.compared
+		try:
+			coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
+			order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+			bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
+			order_by(BittrexDogePricesVolumes.id.desc()).first()
+			prices_dict = {}
+			prices_dict['coinsquare_price_ask_1'] = self.convert_to_float(coinsquare_last_entry.price_ask_1)
+			prices_dict['coinsquare_price_bid_1'] = self.convert_to_float(coinsquare_last_entry.price_bid_1)
+			prices_dict['coinsquare_volume_ask_1'] = self.convert_to_float(coinsquare_last_entry.volume_ask_1)
+			prices_dict['coinsquare_volume_bid_1'] = self.convert_to_float(coinsquare_last_entry.volume_bid_1)
+			prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
+			prices_dict['bittrex_price_ask_1'] = self.convert_to_float(bittrex_last_entry.price_ask_1)
+			prices_dict['bittrex_price_bid_1'] = self.convert_to_float(bittrex_last_entry.price_bid_1)
+			prices_dict['bittrex_volume_ask_1'] = self.convert_to_float(bittrex_last_entry.volume_ask_1)
+			prices_dict['bittrex_volume_bid_1'] = self.convert_to_float(bittrex_last_entry.volume_bid_1)
+			prices_dict['bittrex_compared'] = bittrex_last_entry.compared
+		except Exception as e:
+			print(e)
 
 		return prices_dict
 
@@ -83,8 +87,10 @@ class TextNotification():
 			if self.data_not_looked_at():
 				if self.coinsquare_price_ask_1 < self.bittrex_price_bid_1 or self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
 					if self.bittrex_volume_ask_1 > 160000 and self.bittrex_volume_bid_1 > 160000 and self.coinsquare_volume_ask_1 > 160000 and self.coinsquare_volume_bid_1 > 160000:
+						print('_________________Compare bids and asks method returned True')
 						return True
 		else:
+			print('_________________Compare bids and asks method returned False')
 			return False
 
 	def no_scrape_errors(self):
@@ -98,8 +104,10 @@ class TextNotification():
 	def data_not_looked_at(self):
 		print('________Data not looked at method executing')
 		if self.bittrex_compared == 'False' and self.coinsquare_compared == 'False':
+			print('_________________Method returned True')
 			return True
 		else:
+			print('_________________Method returned False')
 			return False
 
 	def send_notification(self):
@@ -119,7 +127,7 @@ class TextNotification():
 			auth_token = AUTH_TOKEN
 			client = Client(account_sid, auth_token)
 
-			text_message = client.messages.create(body=message, from_='+12012124816', to='+17809321716')
+			text_message = client.messages.create(body=message, from_='+15872063243', to='+17809321716')
 		except Exception as e:
 			print(e)
 		else:
