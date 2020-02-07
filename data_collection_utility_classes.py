@@ -1,11 +1,8 @@
 from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.firefox.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 from datetime import datetime
 import requests
-from concurrent.futures import ThreadPoolExecutor
 from pprint import pprint
 from database_setup import CoinsquareDogePricesVolumes, BittrexDogePricesVolumes
 
@@ -274,9 +271,13 @@ class BittrexPricesVolumes():
 	def get_prices_volumes(self):
 		"""Returns the dict of latest DOGE price-volume pairs from Bittrex exchange"""
 
-		r = requests.get('https://api.bittrex.com/api/v1.1/public/getorderbook?market=BTC-DOGE&type=both')
-
-		order_book = r.json()['result']
+		try:
+			r = requests.get('https://api.bittrex.com/api/v1.1/public/getorderbook?market=BTC-DOGE&type=both')
+		except Exception as e:
+			print(e)
+			order_book = {}
+		else:
+			order_book = r.json()['result']
 
 		price_volume_dict = {}
 

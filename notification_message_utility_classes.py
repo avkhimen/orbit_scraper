@@ -148,18 +148,21 @@ class TextNotification():
 	@staticmethod
 	def update_price_volume_tables(self, need_notification):
 		print('________Update price volume method executing')
-		message_sent_update = 'message_not_sent'
-		if need_notification:
-			message_sent_update = 'message_sent'
-			
 
 		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).order_by(CoinsquareDogePricesVolumes.id.desc()).first()
 		bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).order_by(BittrexDogePricesVolumes.id.desc()).first()
-		
-		coinsquare_last_entry.compared = message_sent_update
-		bittrex_last_entry.compared = message_sent_update
 
-		self.session.commit()
+		if coinsquare_last_entry.compared == 'message_sent' and bittrex_last_entry.compared == 'message_sent':
+			return None
+		else:
+			message_sent_update = 'message_not_sent'
+			if need_notification:
+				message_sent_update = 'message_sent'
+
+			coinsquare_last_entry.compared = message_sent_update
+			bittrex_last_entry.compared = message_sent_update
+
+			self.session.commit()
 
 	@staticmethod
 	def record_into_comparison_table(self, need_notification):
