@@ -133,6 +133,7 @@ class TextNotification():
 		except Exception as e:
 			print(e)
 		else:
+			print('Message sent')
 			return True
 
 	def update_database(self, need_notification):
