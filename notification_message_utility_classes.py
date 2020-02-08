@@ -46,34 +46,6 @@ class TextNotification():
 		self.coinsquare_compared = self.price_volume_dict['coinsquare_compared']
 		print(self.price_volume_dict)
 
-	def get_coinsquare_bittrex_prices_volumes_compared(self):
-		try:
-			coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
-			order_by(CoinsquareDogePricesVolumes.id.desc()).first()
-			bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
-			order_by(BittrexDogePricesVolumes.id.desc()).first()
-			prices_dict = {}
-			prices_dict['coinsquare_price_ask_1'] = self.convert_to_float(coinsquare_last_entry.price_ask_1)
-			prices_dict['coinsquare_price_bid_1'] = self.convert_to_float(coinsquare_last_entry.price_bid_1)
-			prices_dict['coinsquare_volume_ask_1'] = self.convert_to_float(coinsquare_last_entry.volume_ask_1)
-			prices_dict['coinsquare_volume_bid_1'] = self.convert_to_float(coinsquare_last_entry.volume_bid_1)
-			prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
-			prices_dict['bittrex_price_ask_1'] = self.convert_to_float(bittrex_last_entry.price_ask_1)
-			prices_dict['bittrex_price_bid_1'] = self.convert_to_float(bittrex_last_entry.price_bid_1)
-			prices_dict['bittrex_volume_ask_1'] = self.convert_to_float(bittrex_last_entry.volume_ask_1)
-			prices_dict['bittrex_volume_bid_1'] = self.convert_to_float(bittrex_last_entry.volume_bid_1)
-			prices_dict['bittrex_compared'] = bittrex_last_entry.compared
-		except Exception as e:
-			print(e)
-
-		return prices_dict
-
-	def convert_to_float(self, x):
-		try:
-			return float(x.replace(',',''))
-		except Exception as e:
-			return x
-
 	def check_if_need_notification(self):
 		print('________Check if need notification method about to execute')
 		if self.compare_bids_and_asks():
@@ -110,6 +82,52 @@ class TextNotification():
 			print('_________________Method returned False')
 			return False
 
+	@staticmethod
+	def send_notication(self):
+		text_message = TextMessage()
+		text_message.send_notification()
+
+	@staticmethod
+	def update_database(self):
+		update_database = UpdateDatabase(need_notification)
+		update_database.update_database()
+
+class CoinsqureBittrexPricesVolumesCompared():
+	def __init__(self, session):
+		self.session = session
+
+	def get_coinsquare_bittrex_prices_volumes_compared(self):
+		try:
+			coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).\
+			order_by(CoinsquareDogePricesVolumes.id.desc()).first()
+			bittrex_last_entry = self.session.query(BittrexDogePricesVolumes).\
+			order_by(BittrexDogePricesVolumes.id.desc()).first()
+			prices_dict = {}
+			prices_dict['coinsquare_price_ask_1'] = self.convert_to_float(coinsquare_last_entry.price_ask_1)
+			prices_dict['coinsquare_price_bid_1'] = self.convert_to_float(coinsquare_last_entry.price_bid_1)
+			prices_dict['coinsquare_volume_ask_1'] = self.convert_to_float(coinsquare_last_entry.volume_ask_1)
+			prices_dict['coinsquare_volume_bid_1'] = self.convert_to_float(coinsquare_last_entry.volume_bid_1)
+			prices_dict['coinsquare_compared'] = coinsquare_last_entry.compared
+			prices_dict['bittrex_price_ask_1'] = self.convert_to_float(bittrex_last_entry.price_ask_1)
+			prices_dict['bittrex_price_bid_1'] = self.convert_to_float(bittrex_last_entry.price_bid_1)
+			prices_dict['bittrex_volume_ask_1'] = self.convert_to_float(bittrex_last_entry.volume_ask_1)
+			prices_dict['bittrex_volume_bid_1'] = self.convert_to_float(bittrex_last_entry.volume_bid_1)
+			prices_dict['bittrex_compared'] = bittrex_last_entry.compared
+		except Exception as e:
+			print(e)
+
+		return prices_dict
+
+	def convert_to_float(self, x):
+		try:
+			return float(x.replace(',',''))
+		except Exception as e:
+			return x
+
+class TextMessage():
+	def __init__(self):
+		pass
+
 	def send_notification(self):
 		message = self.construct_message()
 		self.send_message(message)
@@ -120,7 +138,8 @@ class TextNotification():
 		elif self.coinsquare_price_bid_1 > self.bittrex_price_ask_1:
 			return "Buy on Bittrex for {} and sell on Coinsquare for {}".format(self.bittrex_price_ask_1, self.coinsquare_price_bid_1)
 
-	def send_message(self, message):
+	@staticmethod
+	def send_message(message):
 		print('________Send message method executing')
 		try:
 			account_sid = ACCOUNT_SID
@@ -136,20 +155,24 @@ class TextNotification():
 			print('Message sent')
 			return True
 
-	def update_database(self, need_notification):
+class UpdateDatabase():
+	def __init__(self, session, need_notification):
+		self.session = session
+		self.need_notification = need_notification
+
+	def update_database(self):
 		print('________Update database method executing')
 		try:
-			self.update_price_volume_tables(self, need_notification)
+			self.update_price_volume_tables()
 		except Exception as e:
 			print(e)
 		try:
-			self.record_into_comparison_table(self, need_notification)
+			self.record_into_comparison_table()
 		except Exception as e:
 			print(e)
 		print('________Update database method finished')
 
-	@staticmethod
-	def update_price_volume_tables(self, need_notification):
+	def update_price_volume_tables(self):
 		print('________Update price volume method executing')
 
 		coinsquare_last_entry = self.session.query(CoinsquareDogePricesVolumes).order_by(CoinsquareDogePricesVolumes.id.desc()).first()
@@ -159,7 +182,7 @@ class TextNotification():
 			return None
 		else:
 			message_sent_update = 'message_not_sent'
-			if need_notification:
+			if self.need_notification:
 				message_sent_update = 'message_sent'
 
 			coinsquare_last_entry.compared = message_sent_update
@@ -167,11 +190,10 @@ class TextNotification():
 
 			self.session.commit()
 
-	@staticmethod
-	def record_into_comparison_table(self, need_notification):
+	def record_into_comparison_table(self):
 		print('________Record into comparison table method executing')
 		compared = 'False'
-		if need_notification:
+		if self.need_notification:
 			compared = 'True'
 
 		timestamp = self.get_current_time_timestamp()
